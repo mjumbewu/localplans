@@ -1,6 +1,5 @@
 import requests
 from django.http import HttpResponse
-from django.views import generic as views
 
 def proxy_view(request, url):
     response = requests.request(
