@@ -80,6 +80,7 @@ var Planning = Planning || {};
       // When the model is changed, update the layer
       this.model.bind('change', this.updateLayer, this);
       this.layer.on('featureparse', this.styleLayer, this);
+      this.layer.on('featureparse', this.setPopupContent, this);
 
       this.updateLayer();
     },
@@ -87,12 +88,19 @@ var Planning = Planning || {};
     styleLayer: function(e) {
       if (e.properties && e.layer.setStyle){
         // The setStyle method isn't available for Points. More on that below ...
-        var s = e.properties.style || {
+        var style = e.properties.style || {
           "color": "#ff4070",
           "weight": 4,
           "opacity": 0.9
         };
-        e.layer.setStyle(s);
+        e.layer.setStyle(style);
+      }
+    },
+
+    setPopupContent: function(e) {
+      if (e.properties){
+        var content = e.properties.popupContent || ('<p><b>' + this.model.get('title') + '</b><br/><i>by ' + this.model.get('author') + '</i></p>');
+        e.layer.bindPopup(content);
       }
     },
 
