@@ -56,6 +56,8 @@ var Planning = Planning || {};
   });
 
   P.FeedItem = Backbone.Model.extend();
-  P.FeedItems = Backbone.Collection.extend();
+  P.FeedItems = Backbone.Collection.extend({
+    model: P.FeedItem
+  });
 
 })(jQuery, Planning);

@@ -8,6 +8,7 @@ var Planning = Planning || {};
       this.map = this.options.map || new L.Map('map');
       this.feedViews = [];
       this.feedsLayerGroup = new L.LayerGroup();
+      this.map.addLayer(this.feedsLayerGroup);
 
       this.render();
 
@@ -18,6 +19,8 @@ var Planning = Planning || {};
     },
 
     updateMap: function() {
+      console.debug('updating the map');
+
       this.feedsLayerGroup.clearLayers();
       this.feedViews = [];
 
@@ -33,7 +36,7 @@ var Planning = Planning || {};
         cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
         cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
 
-      this.map.setView(new L.LatLng(51.505, -0.09), 13).addLayer(cloudmade);
+      this.map.setView(new L.LatLng(2, 101), 6).addLayer(cloudmade);
 
       return this.map;
     }
@@ -42,7 +45,7 @@ var Planning = Planning || {};
   P.MapFeedLayerView = Backbone.View.extend({
     initialize: function() {
       // Set the layer group, or get it from the options.
-      this.group = this.options.group || new L.LayerGroup('map');
+      this.group = this.options.group || new L.LayerGroup();
       this.feedItemViews = [];
 
       this.render();
@@ -54,6 +57,8 @@ var Planning = Planning || {};
     },
 
     updateLayerGroup: function() {
+      console.debug('updating the layer group for feed: ', this.collection);
+
       this.group.clearLayers();
       this.feedItemViews = [];
 
@@ -74,12 +79,30 @@ var Planning = Planning || {};
 
       // When the model is changed, update the layer
       this.model.bind('change', this.updateLayer, this);
+      this.layer.on('featureparse', this.styleLayer, this);
+
+      this.updateLayer();
+    },
+
+    styleLayer: function(e) {
+      if (e.properties && e.layer.setStyle){
+        // The setStyle method isn't available for Points. More on that below ...
+        var s = e.properties.style || {
+          "color": "#ff4070",
+          "weight": 4,
+          "opacity": 0.9
+        };
+        e.layer.setStyle(s);
+      }
     },
 
     updateLayer: function() {
+      console.debug('updating the layer for feed item: ', this.model);
+
       var geo = this.model.get('geo');
       if (geo) {
         this.layer.addGeoJSON(geo);
+        console.log(this.layer)
       }
     },
 
