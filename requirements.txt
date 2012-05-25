@@ -4,6 +4,7 @@
 django
 gevent
 gunicorn
+requests
 
 
 #########################
