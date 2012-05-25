@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>LocalPlans Feed Viewer</title>
+
+    <script src="{{ STATIC_URL }}js/jquery.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap.js"></script>
+    <script src="{{ STATIC_URL }}js/underscore.js"></script>
+    <script src="{{ STATIC_URL }}js/backbone.js"></script>
+    <script src="{{ STATIC_URL }}js/mustache.js"></script>
+    <script src="{{ STATIC_URL }}mustache/js/django.mustache.js"></script>
+
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.map.css" />
+
+    <link rel="stylesheet" href="{{ STATIC_URL }}maps/leaflet.css" />
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="{{ STATIC_URL }}maps/leaflet.ie.css" />
+    <![endif]-->
+    <script src="{{ STATIC_URL }}maps/leaflet.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  </head>
+
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+
+          <a class="brand" href="#">Local Plans</a>
+
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#feeds">Show/hide feeds</a></li>
+              <li><a href="#about">Update location</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+
+        </div>
+      </div>
+    </div>
+
+    <div class="fullscreen">
+      <div class="container-fluid">
+        <div id="map"></div>
+      </div><!--/.fluid-container-->
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <script>
+      var map = new L.Map('map');
+
+      var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+        cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+        cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttribution});
+
+      map.setView(new L.LatLng(51.505, -0.09), 13).addLayer(cloudmade);
+    </script>
+
+  </body>
+</html>
