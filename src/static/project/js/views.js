@@ -2,31 +2,41 @@ var Planning = Planning || {};
 
 (function($, P) {
 
-  P.MapView = Backbone.View.extend({
+  /*
+   * Planning.FeedsMapView
+   * ---------------------
+   * A view that will show Planning.FeedItemsLayerGroupView on a map.  In this
+   * case, the map is what gets updated when feeds are added or removed from
+   * the collection.
+   */
+  P.FeedsMapView = Backbone.View.extend({
     initialize: function() {
       // Set the map, or get it from the options.
       this.map = this.options.map || new L.Map('map');
-      this.feedViews = [];
+
+      // Create a layer group where the feed geometry layers will live. This is
+      // so that, when the feeds are reset, we can just clear this layer group
       this.feedsLayerGroup = new L.LayerGroup();
       this.map.addLayer(this.feedsLayerGroup);
 
       this.render();
 
       // When our collection is changed, update the map
-      this.collection.bind('add', this.updateMap, this);
-      this.collection.bind('remove', this.updateMap, this);
-      this.collection.bind('reset', this.updateMap, this);
+      this.collection.bind('add', this.resetFeedsLayer, this);
+      this.collection.bind('remove', this.resetFeedsLayer, this);
+      this.collection.bind('reset', this.resetFeedsLayer, this);
     },
 
-    updateMap: function() {
+    resetFeedsLayer: function() {
       console.debug('updating the map');
 
       this.feedsLayerGroup.clearLayers();
-      this.feedViews = [];
 
+      // Fetch the collection of feed items for each feed, and create a layer
+      // group for the set of items.
       this.collection.each(function(feed) {
         var items = feed.getItems();
-        var view = new P.MapFeedLayerView({collection: items});
+        var view = new P.FeedItemsLayerGroupView({collection: items});
         this.feedsLayerGroup.addLayer(view.group);
       }, this);
     },
@@ -42,11 +52,16 @@ var Planning = Planning || {};
     }
   });
 
-  P.MapFeedLayerView = Backbone.View.extend({
+  /*
+   * Planning.FeedItemsLayerGroupView
+   * --------------------------------
+   * A view that updates a layer group with layers for each of the feed items
+   * in the collection.
+   */
+  P.FeedItemsLayerGroupView = Backbone.View.extend({
     initialize: function() {
       // Set the layer group, or get it from the options.
       this.group = this.options.group || new L.LayerGroup();
-      this.feedItemViews = [];
 
       this.render();
 
@@ -60,10 +75,9 @@ var Planning = Planning || {};
       console.debug('updating the layer group for feed: ', this.collection);
 
       this.group.clearLayers();
-      this.feedItemViews = [];
 
       this.collection.each(function(feedItem) {
-        var view = new P.MapFeedItemLayerView({model: feedItem});
+        var view = new P.FeedItemLayerView({model: feedItem});
         this.group.addLayer(view.layer);
       }, this);
     },
@@ -73,7 +87,13 @@ var Planning = Planning || {};
     }
   })
 
-  P.MapFeedItemLayerView = Backbone.View.extend({
+  /*
+   * Planning.FeedItemLayerView
+   * --------------------------
+   * A view that updates a layer with features based on the 'geo' attribute in
+   * its model.
+   */
+  P.FeedItemLayerView = Backbone.View.extend({
     initialize: function() {
       this.layer = this.options.layer || new L.GeoJSON();
 
@@ -87,7 +107,6 @@ var Planning = Planning || {};
 
     styleLayer: function(e) {
       if (e.properties && e.layer.setStyle){
-        // The setStyle method isn't available for Points. More on that below ...
         var style = e.properties.style || {
           "color": "#ff4070",
           "weight": 4,
