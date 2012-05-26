@@ -1,8 +1,17 @@
 var Planning = Planning || {};
 
+if (encodeURIComponent === undefined) {
+  encodeURIComponent = function() {
+    return escape.apply(null, arguments)
+      .replace(/\//g, '%2F')
+      .replace(/\+/g, '%2B')
+      .replace(/\@/g, '%40');
+  }
+}
+
 (function($, P) {
 
-  var hubUrl = '/proxy/http://planning-feeds-hub.herokuapp.com/api/feeds/';
+  var hubUrl = '/proxy/' + encodeURIComponent('http://planning-feeds-hub.herokuapp.com/api/feeds/');
 
   /*
    * Planning.Feed(s)
@@ -19,7 +28,7 @@ var Planning = Planning || {};
      */
     getItems: function(options) {
       var feedItems = new P.FeedItems();
-      feedItems.url = '/proxy/' + this.get('source_url');
+      feedItems.url = '/proxy/' + encodeURIComponent(this.get('source_url'));
       feedItems.fetch(options);
       return feedItems;
     }
